@@ -1,0 +1,31 @@
+build/
+dist/
+artifacts/
+*.xcuserstate
+xcuserdata/
+
+# macOS / local editor files
+.DS_Store
+.AppleDouble/
+*.swp
+*.swo
+
+# Local credentials, databases and private exports
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+preferences*.json
+snapshot.json
+notification-ledger.json
+AgentBoard-配置*.json
+AgentBoard-诊断*.json

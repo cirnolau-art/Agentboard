@@ -1,0 +1,16 @@
+#!/bin/zsh
+set -euo pipefail
+PROJECT_DIR="${0:A:h}"
+python3 "$PROJECT_DIR/generate-project.py"
+xcodebuild -project "$PROJECT_DIR/AgentBoard.xcodeproj" -scheme AgentBoard -configuration Release -derivedDataPath "$PROJECT_DIR/build" CODE_SIGNING_ALLOWED=NO build "$@"
+mkdir -p "$PROJECT_DIR/dist"
+ditto "$PROJECT_DIR/build/Build/Products/Release/AgentBoard.app" "$PROJECT_DIR/dist/AgentBoard.app"
+mkdir -p "$PROJECT_DIR/build/AgentBoard.iconset"
+swift "$PROJECT_DIR/Tools/generate-icon.swift" "$PROJECT_DIR/build/AgentBoard.iconset"
+mkdir -p "$PROJECT_DIR/dist/AgentBoard.app/Contents/Resources"
+iconutil -c icns "$PROJECT_DIR/build/AgentBoard.iconset" -o "$PROJECT_DIR/dist/AgentBoard.app/Contents/Resources/AppIcon.icns"
+/usr/libexec/PlistBuddy -c "Add :CFBundleIconFile string AppIcon" "$PROJECT_DIR/dist/AgentBoard.app/Contents/Info.plist"
+codesign --force --sign - --requirements '=designated => identifier "local.agentboard.widget"' --entitlements "$PROJECT_DIR/Config/Widget.entitlements" "$PROJECT_DIR/dist/AgentBoard.app/Contents/PlugIns/AgentBoardWidget.appex"
+codesign --force --sign - --requirements '=designated => identifier "local.agentboard"' --entitlements "$PROJECT_DIR/Config/App.entitlements" "$PROJECT_DIR/dist/AgentBoard.app"
+codesign --verify --deep --strict "$PROJECT_DIR/dist/AgentBoard.app"
+print "已构建：$PROJECT_DIR/dist/AgentBoard.app"
